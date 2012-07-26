@@ -129,7 +129,29 @@ module.exports = class GraphDatabase
 
         catch error
             throw adjustError error
+            
+    getAutomatedIndexedNodes(property, value, _) ->
+        try
+            services = @getServices _
+            key = encodeURIComponent property
+            val = encodeURIComponent value
+            url = "#{services.node_index}/auto/node/#{key}/#{val}"
 
+            response = @_request.get url, _
+
+            if response.statusCode isnt status.OK
+                # Database error
+                throw response
+
+            # Success
+            nodeArray = JSON.parse response.body
+            nodes = nodeArray.map (node) =>
+                new Node this, node
+            return nodes
+
+        catch error
+            throw adjustError error
+            
     getNodeById: (id, _) ->
         try
             services = @getServices _
